@@ -25,4 +25,4 @@ jobs:
 
     - name: Copy files to S3 bucket
       run: |
-        aws s3 sync . s3://playwire-mobile-test --exclude .github/*
+        aws s3 sync . s3://playwire-mobile-test --include ./config/*
