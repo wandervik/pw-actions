@@ -1,8 +1,5 @@
 name: Upload assets to S3 bucket
 
-env:
-  region: eu-central-1
-
 on:
   push:
     branches:
@@ -23,7 +20,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ region }}
+        aws-region: eu-central-1
 
 
     - name: Copy files to S3 bucket
@@ -38,3 +35,4 @@ jobs:
     #     AWS_REGION: "eu-central-1"
     #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
     #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
