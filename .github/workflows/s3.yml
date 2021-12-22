@@ -1,5 +1,8 @@
 name: Upload assets to S3 bucket
 
+env:
+  region: eu-central-1
+
 on:
   push:
     branches:
@@ -20,18 +23,18 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-central-1
+        aws-region: ${{ region }}
 
 
     - name: Copy files to S3 bucket
       run: |
         aws s3 sync . s3://playwire-mobile-test --exclude ".github/*" --exclude ".git/*"
 
-    - name: Invalidate CloudFront
-      uses: chetan/invalidate-cloudfront-action@v2
-      env:
-        DISTRIBUTION: "E3MY6RLJJ44XBK"
-        PATHS: "/*"
-        AWS_REGION: "eu-central-1"
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    # - name: Invalidate CloudFront
+    #   uses: chetan/invalidate-cloudfront-action@v2
+    #   env:
+    #     DISTRIBUTION: "E3MY6RLJJ44XBK"
+    #     PATHS: "/*"
+    #     AWS_REGION: "eu-central-1"
+    #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
