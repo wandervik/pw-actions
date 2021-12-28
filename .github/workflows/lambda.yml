@@ -23,7 +23,7 @@ jobs:
         aws-region: eu-central-1
     - name: Update variable
       run: |
-        git fetch
+        git fetch --prune --unshallow
         var=$(git describe)
         aws lambda update-function-configuration --function-name version --environment Variables={VERSION=$var}
 
