@@ -23,7 +23,7 @@ jobs:
         aws-region: eu-central-1
     - name: Update variable
       run: |
-        aws lambda update-function-configuration --function-name version --environment Variables={VERSION=1.1.2}
+        aws lambda update-function-configuration --function-name version --environment Variables={VERSION=$(git describe)}
 
 
 
