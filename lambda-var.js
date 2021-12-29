@@ -1,12 +1,14 @@
 const http = require('http');
+const version_cloudfront='1.0.0';
+
 let test4 = null;
 
 exports.handler = async (event, context, callback) => {
-    console.log(process.env.VERSION)
+    console.log(version_cloudfront)
 
     try {
         await Promise.all([
-            fetchPageOS(process.env.VERSION),
+            fetchPageOS(version_cloudfront),
         ]);
     } catch (e) {
         console.error('ERROR:', e);
@@ -16,7 +18,7 @@ exports.handler = async (event, context, callback) => {
         status: '200',
         statusDescription: 'OK',
 
-        body: `${test4};` + `\nversion: ${process.env.VERSION}`
+        body: `${test4};` + `\nversion: ${version_cloudfront}`
 
     };
     callback(null, response);

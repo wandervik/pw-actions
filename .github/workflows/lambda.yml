@@ -26,6 +26,13 @@ jobs:
     #     git fetch --prune --unshallow
     #     var=$(git describe)
     #     aws lambda update-function-configuration --function-name version --environment Variables={VERSION=$var}
+    - name: Put current version
+      run: |
+        git fetch --prune --unshallow
+        var=$(git describe)
+        python3 insert-version.py $var
+
+
     - name: Deploy lambda
       uses: appleboy/lambda-action@master
       with:
