@@ -1,0 +1,19 @@
+name: Deploy script to s3
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    name: Deploy script
+
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Deploy to s3
+      run: echo "Hello world"
