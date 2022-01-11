@@ -11,35 +11,53 @@ on:
  #       default: 'dev'
 
 jobs:
-  read-package-json:
-    name: Read JSON file
-    runs-on: ubuntu-latest
-    environment: dev
+  # read-package-json:
+  #   name: Read JSON file
+  #   runs-on: ubuntu-latest
+  #   environment: dev
 
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+  #   outputs:
+  #     matrix: ${{ steps.set-matrix.outputs.matrix }}
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
 
-    - name: set-matrix
-      run: |
-        cat package.json
-        JSON=$(cat package.json)
-        # echo "::set-output name=matrix::${JSON//'%'/'%25'}"
-        echo "::set-output name=matrix::$JSON"
+  #   - name: set-matrix
+  #     run: |
+  #       cat package.json
+  #       JSON=$(cat package.json)
+  #       # echo "::set-output name=matrix::${JSON//'%'/'%25'}"
+  #       echo "::set-output name=matrix::$JSON"
 
-  build:
-    needs: read-package-json
-    runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{ fromJson(needs.read-package-json.outputs.matrix) }}
-    environment: dev
-    env:
-      version: ${{ matrix.version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+  # build:
+  #   needs: read-package-json
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix: ${{ fromJson(needs.read-package-json.outputs.matrix) }}
+  #   environment: dev
+  #   env:
+  #     version: ${{ matrix.version }}
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
 
-      - name: Test
-        run: echo $version
+  #     - name: Test
+  #       run: echo $version
+
+    build:
+      runs-on: ubuntu-latest
+      environment: dev
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v2
+
+        - name: Set version
+          id: set_var
+          run: |
+            content=`cat ./package.json`
+            content="${content//'%'/'%25'}"
+            content="${content//$'\n'/'%0A'}"
+            content="${content//$'\r'/'%0D'}"
+            echo "::set-output name=packageJson::$content"
+        - run: |
+            echo "${{fromJson(steps.set_var.outputs.packageJson).version}}"
