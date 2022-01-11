@@ -19,8 +19,8 @@ jobs:
     - id: set-matrix
       run: |
         ls
-        JSON=$(cat package.json)
-        echo "::set-output name=matrix::${JSON//'%'/'%25'}"
+        # JSON=$(cat package.json)
+        # echo "::set-output name=matrix::${JSON//'%'/'%25'}"
 
   build:
     needs: read-package-json
