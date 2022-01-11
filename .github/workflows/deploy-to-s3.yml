@@ -1,7 +1,8 @@
 name: Deploy to S3 with envs
 on:
   push:
-    [ main ]
+    branches: [ main ]
+
   workflow_dispatch:
     inputs:
       environment:
