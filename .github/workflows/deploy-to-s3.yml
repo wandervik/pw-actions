@@ -1,0 +1,36 @@
+name: Deploy to S3 with envs
+on:
+  push:
+    [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+        description: Select the environment
+        default: 'dev'
+
+jobs:
+  read-package-json: # reads package.json file
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - id: set-matrix
+      run: |
+        JSON=$(cat ./package.json)
+        echo "::set-output name=matrix::${JSON//'%'/'%25'}"
+
+  build:
+    needs: read-package-json
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJson(needs.read-package-json.outputs.matrix)}}
+    environment: dev
+    env:
+      version: ${{ matrix.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Test
+        run: echo $version
