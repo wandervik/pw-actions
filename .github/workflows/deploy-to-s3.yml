@@ -26,12 +26,13 @@ jobs:
       run: |
         JSON=$(cat package.json)
         echo "::set-output name=matrix::${JSON//'%'/'%25'}"
+        echo $matrix
 
   build:
     needs: read-package-json
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.read-package-json.outputs.matrix)}}
+      matrix: ${{ fromJson(needs.read-package-json.outputs.matrix) }}
     environment: dev
     env:
       version: ${{ matrix.version }}
