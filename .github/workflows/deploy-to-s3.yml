@@ -3,12 +3,12 @@ on:
   push:
     branches: [ main ]
 
-  workflow_dispatch:
-    inputs:
-      environment:
-        type: environment
-        description: Select the environment
-        default: 'dev'
+ # workflow_dispatch:
+ #   inputs:
+ #     environment:
+ #       type: environment
+ #       description: Select the environment
+ #       default: 'dev'
 
 jobs:
   read-package-json: # reads package.json file
@@ -18,9 +18,8 @@ jobs:
     steps:
     - id: set-matrix
       run: |
-        ls
-        # JSON=$(cat package.json)
-        # echo "::set-output name=matrix::${JSON//'%'/'%25'}"
+        JSON=$(cat package.json)
+        echo "::set-output name=matrix::${JSON//'%'/'%25'}"
 
   build:
     needs: read-package-json
