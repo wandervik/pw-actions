@@ -27,7 +27,6 @@ jobs:
         JSON=$(cat package.json)
         # echo "::set-output name=matrix::${JSON//'%'/'%25'}"
         echo "::set-output name=matrix::$JSON"
-        echo $matrix
 
   build:
     needs: read-package-json
