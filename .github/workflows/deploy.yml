@@ -1,13 +1,14 @@
 name: Deploy script to s3
 
 on:
-  release:
-    types: [published]
+  # release:
+  #   types: [published]
   workflow_dispatch:
     inputs:
       environment:
         type: environment
         description: Select the environment
+        required: true
         default: 'dev'
 
 jobs:
