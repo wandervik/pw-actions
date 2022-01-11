@@ -11,12 +11,18 @@ on:
  #       default: 'dev'
 
 jobs:
-  read-package-json: # reads package.json file
+  read-package-json:
+    name: Read JSON file
     runs-on: ubuntu-latest
+    environment: dev
+
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-    - id: set-matrix
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: set-matrix
       run: |
         JSON=$(cat package.json)
         echo "::set-output name=matrix::${JSON//'%'/'%25'}"
