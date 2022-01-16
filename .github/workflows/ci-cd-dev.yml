@@ -11,16 +11,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set version
-        id: set_var
-        run: |
-          content=`cat ./package.json`
-          content="${content//'%'/'%25'}"
-          content="${content//$'\n'/'%0A'}"
-          content="${content//$'\r'/'%0D'}"
-          echo "::set-output name=packageJson::$content"
-      - run: |
-          VERSION="${{fromJson(steps.set_var.outputs.packageJson).version}}"
+      # - name: Set version
+      #   id: set_var
+      #   run: |
+      #     content=`cat ./package.json`
+      #     content="${content//'%'/'%25'}"
+      #     content="${content//$'\n'/'%0A'}"
+      #     content="${content//$'\r'/'%0D'}"
+      #     echo "::set-output name=packageJson::$content"
+      # - run: |
+      #     VERSION="${{fromJson(steps.set_var.outputs.packageJson).version}}"
 
       - name:  'Automated Version Bump'
         uses:  'phips28/gh-action-bump-version@master'
@@ -31,8 +31,11 @@ jobs:
           major-wording:  'MAJOR,cut-major'
           patch-wording:  'patch,fixes'
           rc-wording:     'RELEASE,alpha'
+          commit-message: 'CI: bumps version to {{version}}'
 
-      # - name: NPM build
+      - name: NPM build
+        run: echo ${{version}}
+
       #   uses: actions/setup-node@master
       #   with:
       #     node-version: 12
