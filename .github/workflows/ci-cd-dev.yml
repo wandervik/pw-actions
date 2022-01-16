@@ -7,9 +7,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: dev
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+# >>>>>>>>>>>>>>>>>>>>>> BUILD <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
       - name: Set version
         id: set_var
@@ -21,8 +25,6 @@ jobs:
           echo "::set-output name=packageJson::$content"
       - run: |
           echo "prev_version=${{fromJson(steps.set_var.outputs.packageJson).version}}" >> $GITHUB_ENV
-
-
 
       - name:  'Automated Version Bump'
         uses:  'phips28/gh-action-bump-version@master'
@@ -56,32 +58,7 @@ jobs:
 # Debug msg versions:
 # echo "old version is - ${{ env.prev_version }} and new version is - ${{ env.new_version }}"
 
-  deploy:
-    runs-on: ubuntu-latest
-    environment: dev
-
-    env:
-      # aws-cdn:
-      # aws-s3-bucket:
-      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      aws-region: eu-central-1
-    needs: build
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Retrieve new version
-        id: set_new_var
-        run: |
-          content=`cat ./package.json`
-          content="${content//'%'/'%25'}"
-          content="${content//$'\n'/'%0A'}"
-          content="${content//$'\r'/'%0D'}"
-          echo "::set-output name=packageJson::$content"
-      - run: |
-          echo "new_version=${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+# >>>>>>>>>>>>>>>>>>>>>> DEPLOY <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
