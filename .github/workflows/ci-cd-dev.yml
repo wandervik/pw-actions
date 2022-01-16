@@ -7,8 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      VERSION: 'default'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -46,13 +44,11 @@ jobs:
           content="${content//$'\r'/'%0D'}"
           echo "::set-output name=packageJson::$content"
       - run: |
-          echo "::set-output name=VERSION::${{fromJson(steps.set_new_var.outputs.packageJson).version}}"
+          echo "new_version=${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $GITHUB_ENV
 
       - name: NPM build
-        env:
-          NEW_VERSION: ${{ join(steps.set_new_var.outputs.VERSION, 'v') }}
         run: |
-          echo "version is - ${{ env.prev_version }}"
+          echo "old version is - ${{ env.prev_version }} and new version is - ${{ env.new_version }}"
 
 
       #   uses: actions/setup-node@master
