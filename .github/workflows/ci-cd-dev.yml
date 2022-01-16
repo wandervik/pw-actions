@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # env:
+    #   VERSION: 'default'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -51,7 +53,7 @@ jobs:
         env:
           NEW_VERSION: ${{ join(steps.set_new_var.outputs.VERSION, 'v') }}
         run: |
-          echo "version is - $NEW_VERSION"
+          echo "version is - ${{ env.NEW_VERSION }}"
 
 
       #   uses: actions/setup-node@master
