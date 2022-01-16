@@ -48,7 +48,8 @@ jobs:
 
       - name: NPM build
         run: |
-          echo "the version is: ${{PREV_VERSION}}"
+          echo "version is - ${{steps.set_new_var.outputs.VERSION}}"
+
 
       #   uses: actions/setup-node@master
       #   with:
