@@ -20,7 +20,9 @@ jobs:
           content="${content//$'\r'/'%0D'}"
           echo "::set-output name=packageJson::$content"
       - run: |
-          PREV_VERSION="${{fromJson(steps.set_var.outputs.packageJson).version}}"
+          prev_version="${{fromJson(steps.set_var.outputs.packageJson).version}}"
+        env:
+          PREV_VERSION: $prev_version
 
       - name:  'Automated Version Bump'
         uses:  'phips28/gh-action-bump-version@master'
@@ -46,7 +48,7 @@ jobs:
 
       - name: NPM build
         run: |
-          echo "the version is: ${{(steps.set_new_var.outputs.VERSION)}}"
+          echo "the version is: $PREV_VERSION
 
       #   uses: actions/setup-node@master
       #   with:
