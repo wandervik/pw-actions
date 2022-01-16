@@ -33,7 +33,7 @@ jobs:
           major-wording:  'MAJOR,cut-major'
           patch-wording:  'patch,fixes'
           rc-wording:     'RELEASE,alpha'
-          commit-message: 'CI: bumps version to {{version}}'
+          commit-message: 'Bumped version number. Current version: {{version}}'
 
       - name: Set new version
         id: set_new_var
@@ -46,16 +46,15 @@ jobs:
       - run: |
           echo "new_version=${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $GITHUB_ENV
 
-      - name: NPM build
-        run: |
-          echo "old version is - ${{ env.prev_version }} and new version is - ${{ env.new_version }}"
-
-
+      # - name: NPM build
+      #   run: |
       #   uses: actions/setup-node@master
       #   with:
       #     node-version: 12
       # - run: npm run buildCDN:dev
 
+# Debug msg versions:
+# echo "old version is - ${{ env.prev_version }} and new version is - ${{ env.new_version }}"
 
   deploy:
     runs-on: ubuntu-latest
@@ -82,7 +81,13 @@ jobs:
 
       # - name: Check if remote repositiry is exist
 
-      # - name: Push to bucket
+      - name: Push to bucket
+        run: |
+          aws s3 cp dist/* s3://playwire-mobile-test/${{ env.new_version }} --recursive
+
+
+    #       const path = typeof globals.featurePath === 'undefined' ? `s3://${globals.bucket}/${globals.newVersion}/` : `s3://${globals.bucket}/`
+    # run(`s3cmd put dist/* -r --acl-public ${path}`)
 
       # - name: Invalidate CDN
       #   uses: chetan/invalidate-cloudfront-action@v2
