@@ -10,3 +10,5 @@ data = data.replace('1.0.0', version)
 
 with open('lambda-var.js', 'w') as file:
     file.write(data)
+
+    # lol kek
