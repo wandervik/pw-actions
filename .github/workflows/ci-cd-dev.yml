@@ -34,7 +34,7 @@ jobs:
           commit-message: 'CI: bumps version to {{version}}'
 
       - name: Set new version
-        id: set_var
+        id: set_new_var
         run: |
           content=`cat ./package.json`
           content="${content//'%'/'%25'}"
@@ -42,7 +42,7 @@ jobs:
           content="${content//$'\r'/'%0D'}"
           echo "::set-output name=packageJson::$content"
       - run: |
-          VERSION="${{fromJson(steps.set_var.outputs.packageJson).version}}"
+          VERSION="${{fromJson(steps.set_new_var.outputs.packageJson).version}}"
 
       # - name: NPM build
       #   run: echo ${{VERSION}}
