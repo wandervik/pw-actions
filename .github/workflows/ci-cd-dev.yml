@@ -45,6 +45,7 @@ jobs:
           echo "::set-output name=packageJson::$content"
       - run: |
           echo "::set-output name=VERSION::1.5"
+          echo "version is ${{ steps.set_new_var.outputs.VERSION }}"
 
       - name: NPM build
         env:
