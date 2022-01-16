@@ -47,8 +47,10 @@ jobs:
           echo "::set-output name=VERSION::${{fromJson(steps.set_new_var.outputs.packageJson).version}}"
 
       - name: NPM build
+        env:
+          NEW_VERSION: ${{steps.set_new_var.outputs.VERSION}}
         run: |
-          echo "version is - ${{steps.set_new_var.outputs.VERSION}}"
+          echo "version is - $NEW_VERSION"
 
 
       #   uses: actions/setup-node@master
