@@ -32,6 +32,7 @@ jobs:
           patch-wording:  'patch,fixes'
           rc-wording:     'RELEASE,alpha'
           commit-message: 'CI: bumps version to {{version}}'
+        run: version={{version}}
 
       - name: NPM build
         run: echo ${{version}}
