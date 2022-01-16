@@ -43,12 +43,11 @@ jobs:
           echo "::set-output name=packageJson::$content"
       - run: |
           VERSION="${{fromJson(steps.set_new_var.outputs.packageJson).version}}"
+          echo "this is version $VERSION"
 
       - name: NPM build
         run: |
-          touch test.txt
-          echo $VERSION >> test.txt
-          cat test.txt
+          echo "empty message: $VERSION"
 
       #   uses: actions/setup-node@master
       #   with:
