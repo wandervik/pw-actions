@@ -1,18 +1,12 @@
-name: Deploy to S3 with envs
+name: S3 Continuous Deployment to dev
+
 on:
-  pull_request:
-    branches: [ release ]
-  workflow_dispatch:
-    inputs:
-      environment:
-        type: environment
-        description: Select the environment
-        default: 'dev'
+  push:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: dev
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -28,13 +22,30 @@ jobs:
       - run: |
           VERSION="${{fromJson(steps.set_var.outputs.packageJson).version}}"
 
+      - name:  'Automated Version Bump'
+        uses:  'phips28/gh-action-bump-version@master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          minor-wording:  'add,Adds,new,feat,minor'
+          major-wording:  'MAJOR,cut-major'
+          patch-wording:  'patch,fixes'
+          rc-wording:     'RELEASE,alpha'
 
-  deploy-dev:
+      # - name: NPM build
+      #   uses: actions/setup-node@master
+      #   with:
+      #     node-version: 12
+      # - run: npm run buildCDN:dev
+
+
+  deploy:
     runs-on: ubuntu-latest
     environment: dev
+
     env:
-      aws-cdn: devcdn.intergi.com/pageos
-      aws-s3-bucket: devcdn.intergi.com/pageos
+      # aws-cdn:
+      # aws-s3-bucket:
       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws-region: eu-central-1
@@ -51,15 +62,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
 
-      - name: Push to bucket
+      # - name: Check if remote repositiry is exist
 
-      - name: Purge CDN
+      # - name: Push to bucket
 
-
-
-  # deploy-prod:
-  # runs-on: ubuntu-latest
-  # environment: prod
-  # env:
-  #   aws-cdn: cdn.intergient.com/pageos
-  #   aws-s3-bucket: cdn.intergient/pageos
+      # - name: Invalidate CDN
+      #   uses: chetan/invalidate-cloudfront-action@v2
+      #   env:
+      #     DISTRIBUTION:
+      #     PATHS: "/*"
+      #     AWS_REGION: "eu-central-1"
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
