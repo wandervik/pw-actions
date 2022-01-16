@@ -22,7 +22,7 @@ jobs:
       - run: |
           prev_version="${{fromJson(steps.set_var.outputs.packageJson).version}}"
         env:
-          PREV_VERSION: $prev_version
+          PREV_VERSION: ${{ prev_version }}
 
       - name:  'Automated Version Bump'
         uses:  'phips28/gh-action-bump-version@master'
@@ -48,7 +48,7 @@ jobs:
 
       - name: NPM build
         run: |
-          echo "the version is: $PREV_VERSION"
+          echo "the version is: ${{PREV_VERSION}}"
 
       #   uses: actions/setup-node@master
       #   with:
