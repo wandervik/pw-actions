@@ -83,7 +83,7 @@ jobs:
 
       - name: Push to bucket
         run: |
-          aws s3 cp dist/testfile.txt s3://playwire-mobile-test
+          aws s3 sync dist s3://playwire-mobile-test
 
 
     #       const path = typeof globals.featurePath === 'undefined' ? `s3://${globals.bucket}/${globals.newVersion}/` : `s3://${globals.bucket}/`
