@@ -7,8 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # env:
-    #   VERSION: 'default'
+    env:
+      VERSION: 'default'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -46,14 +46,13 @@ jobs:
           content="${content//$'\r'/'%0D'}"
           echo "::set-output name=packageJson::$content"
       - run: |
-          echo "::set-output name=VERSION::1.5"
-          echo "version is ${{ steps.set_new_var.outputs.VERSION }}"
+          echo "::set-output name=VERSION::${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $VERSION
 
       - name: NPM build
         env:
           NEW_VERSION: ${{ join(steps.set_new_var.outputs.VERSION, 'v') }}
         run: |
-          echo "version is - ${{ env.NEW_VERSION }}"
+          echo "version is - ${{ env.VERSION }}"
 
 
       #   uses: actions/setup-node@master
@@ -61,7 +60,7 @@ jobs:
       #     node-version: 12
       # - run: npm run buildCDN:dev
 
-#           echo "::set-output name=VERSION::${{fromJson(steps.set_new_var.outputs.packageJson).version}}"
+
   deploy:
     runs-on: ubuntu-latest
     environment: dev
