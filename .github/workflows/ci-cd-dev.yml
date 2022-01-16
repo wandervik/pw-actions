@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build-deploy-dev:
     runs-on: ubuntu-latest
     environment: dev
 
@@ -67,20 +67,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
 
-      # - name: Check if remote repositiry is exist
+      # - name: Check if remote repositiry is exist ch
 
       - name: Push to bucket
         run: |
           aws s3 sync dist s3://playwire-mobile-test/${{ env.new_version }} --acl public-read
 
-
-    #       const path = typeof globals.featurePath === 'undefined' ? `s3://${globals.bucket}/${globals.newVersion}/` : `s3://${globals.bucket}/`
-    # run(`s3cmd put dist/* -r --acl-public ${path}`)
-
       # - name: Invalidate CDN
       #   uses: chetan/invalidate-cloudfront-action@v2
       #   env:
-      #     DISTRIBUTION:
+      #     DISTRIBUTION: ${{ env.AWS_CDN_DISTRIBUTION }}
       #     PATHS: "/*"
       #     AWS_REGION: "eu-central-1"
       #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
