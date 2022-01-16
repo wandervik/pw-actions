@@ -44,7 +44,7 @@ jobs:
           content="${content//$'\r'/'%0D'}"
           echo "::set-output name=packageJson::$content"
       - run: |
-          echo "::set-output name=VERSION::${{fromJson(steps.set_new_var.outputs.packageJson).version}}"
+          echo "::set-output name=VERSION::1.5"
 
       - name: NPM build
         env:
@@ -58,7 +58,7 @@ jobs:
       #     node-version: 12
       # - run: npm run buildCDN:dev
 
-
+#           echo "::set-output name=VERSION::${{fromJson(steps.set_new_var.outputs.packageJson).version}}"
   deploy:
     runs-on: ubuntu-latest
     environment: dev
