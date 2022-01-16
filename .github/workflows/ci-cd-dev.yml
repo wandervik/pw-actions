@@ -46,7 +46,7 @@ jobs:
 
       - name: NPM build
         run: |
-          echo "the version is: ${{(steps.set_new_var.outputs.VERSION}}"
+          echo "the version is: ${{(steps.set_new_var.outputs.VERSION)}}"
 
       #   uses: actions/setup-node@master
       #   with:
