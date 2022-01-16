@@ -83,7 +83,7 @@ jobs:
 
       - name: Push to bucket
         run: |
-          aws s3 cp dist/* s3://playwire-mobile-test/${{ env.new_version }} --recursive
+          aws s3 cp dist/testfile.txt s3://playwire-mobile-test
 
 
     #       const path = typeof globals.featurePath === 'undefined' ? `s3://${globals.bucket}/${globals.newVersion}/` : `s3://${globals.bucket}/`
