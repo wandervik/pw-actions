@@ -22,7 +22,7 @@ jobs:
       - run: |
           prev_version="${{fromJson(steps.set_var.outputs.packageJson).version}}"
         env:
-          PREV_VERSION: ${{ prev_version }}
+          PREV_VERSION: $prev_version
 
       - name:  'Automated Version Bump'
         uses:  'phips28/gh-action-bump-version@master'
