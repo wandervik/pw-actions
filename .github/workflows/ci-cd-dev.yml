@@ -22,7 +22,8 @@ jobs:
           content="${content//$'\r'/'%0D'}"
           echo "::set-output name=packageJson::$content"
       - run: |
-          prev_version="${{fromJson(steps.set_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+          echo "prev_version=${{fromJson(steps.set_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+
 
 
       - name:  'Automated Version Bump'
