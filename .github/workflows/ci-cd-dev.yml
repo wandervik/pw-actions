@@ -72,6 +72,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Retrieve new version
+        id: set_new_var
+        run: |
+          content=`cat ./package.json`
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          echo "::set-output name=packageJson::$content"
+      - run: |
+          echo "new_version=${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -83,7 +94,7 @@ jobs:
 
       - name: Push to bucket
         run: |
-          aws s3 sync dist s3://playwire-mobile-test/v2
+          aws s3 sync dist s3://playwire-mobile-test/${{ env.new_version }}
 
 
     #       const path = typeof globals.featurePath === 'undefined' ? `s3://${globals.bucket}/${globals.newVersion}/` : `s3://${globals.bucket}/`
