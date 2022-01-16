@@ -42,8 +42,8 @@ jobs:
           content="${content//$'\r'/'%0D'}"
           echo "::set-output name=packageJson::$content"
       - run: |
-          VERSION="${{fromJson(steps.set_new_var.outputs.packageJson).version}}"
-          echo "this is version $VERSION"
+          echo "::set-output name=VERSION::$(echo "${{fromJson(steps.set_new_var.outputs.packageJson).version}}")"
+          echo "version is $VERSION"
 
       - name: NPM build
         run: |
