@@ -74,7 +74,7 @@ jobs:
         run: |
           if [[ $(aws s3 ls s3://playwire-mobile-test/${{ env.prev_version }}| head) ]]; then echo "do stuff"; else exit 1; fi
 
-      # - name: Check if remote repositiry is exist
+      # - name: Check if remote repositiry is exist test
       #   id: check
       #   run: |
       #     directory_exist=$(aws s3 ls s3://playwire-mobile-test/1.10.1)
