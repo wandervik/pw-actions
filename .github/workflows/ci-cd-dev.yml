@@ -1,19 +1,29 @@
 name: S3 Continuous Deployment to dev
 
 on:
-  push:
-    branches: [ main ]
+  pull_request:
+    branches: [ 'release', 'master' ]
+env:
+  AWS_REGION: "eu-central-1"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_CDN_DISTRIBUTION: test-dist
+  LAMBDA_FUNCTION: test-lambda
+
 
 jobs:
   build-deploy-dev:
+    if: ${{ github.ref == 'refs/heads/release' }}
     runs-on: ubuntu-latest
+    env:
+     S3_PATH: test
+     CDN_PATH: test
+
     environment: dev
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-# >>>>>>>>>>>>>>>>>>>>>> BUILD <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
       - name: Set version
         id: set_var
@@ -48,6 +58,22 @@ jobs:
       - run: |
           echo "new_version=${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $GITHUB_ENV
 
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Check if remote repositiry is exist
+        run: |
+          echo "::set-env name=DIRECTORY_EXIST::$(aws s3 ls s3://playwire-mobile-test/${{ env.prev_version }})
+
+      - name: Proceed with build Check
+        if: ${{ env.DIRECTORY_EXIST == ''}}
+        run: exit 1
+
       # - name: NPM build
       #   run: |
       #   uses: actions/setup-node@master
@@ -60,14 +86,8 @@ jobs:
 
 # >>>>>>>>>>>>>>>>>>>>>> DEPLOY <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1
 
-      # - name: Check if remote repositiry is exist ch
+      # if [[ $(aws s3 ls s3://mybucket/myfolder | head) ]]; then echo "do stuff"; else echo "folder does not exist"; fi
 
       - name: Push to bucket
         run: |
