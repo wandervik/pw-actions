@@ -11,8 +11,6 @@ env:
   AWS_REGION: "eu-central-1"
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_CDN_DISTRIBUTION: test-dist
-  LAMBDA_FUNCTION: test-lambda
 
 
 jobs:
@@ -20,8 +18,9 @@ jobs:
     # if: ${{ github.ref == 'refs/heads/release' }}
     runs-on: ubuntu-latest
     env:
-     S3_PATH: test
-     CDN_PATH: test
+     AWS_S3_PATH: s3://playwire-mobile-test
+     AWS_CDN_DISTRIBUTION: E3MY6RLJJ44XBK
+     LAMBDA_FUNCTION: version
 
     environment: dev
 
@@ -72,11 +71,11 @@ jobs:
 
       - name: Check old version repositiry existing
         run: |
-          if [[ $(aws s3 ls s3://playwire-mobile-test/${{ env.prev_version }}| head) ]]; then echo "Old version exists"; else exit 1; fi
+          if [[ $(aws s3 ls ${{ env.AWS_S3_PATH }}/${{ env.prev_version }}| head) ]]; then echo "Old version exists"; else exit 1; fi
 
       - name: Prevent overriding old version
         run: |
-          if [[ $(aws s3 ls s3://playwire-mobile-test/${{ env.new_version }}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
+          if [[ $(aws s3 ls ${{ env.AWS_S3_PATH }}/${{ env.new_version }}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
 
       # - name: NPM build
       #   run: |
@@ -90,33 +89,30 @@ jobs:
 
 # >>>>>>>>>>>>>>>>>>>>>> DEPLOY <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
-
-
       - name: Push to bucket
         run: |
-          aws s3 sync dist s3://playwire-mobile-test/${{ env.new_version }} --acl public-read
+          aws s3 sync dist ${{ env.AWS_S3_PATH }}/${{ env.new_version }} --acl public-read
 
       # - name: Invalidate CDN
       #   uses: chetan/invalidate-cloudfront-action@v2
       #   env:
       #     DISTRIBUTION: ${{ env.AWS_CDN_DISTRIBUTION }}
       #     PATHS: "/*"
-      #     AWS_REGION: "eu-central-1"
+      #     AWS_REGION: ${{ env.AWS_REGION }}
       #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      # - name: Put current version
-      #   run: |
-      #     version=${{ env.new_version }}
-      #     python3 insert-version.py $version
+      - name: Put current version
+        run: |
+          version=${{ env.new_version }}
+          python3 insert-version.py $version
 
 
-      # - name: Deploy lambda
-      #   uses: appleboy/lambda-action@master
-      #   with:
-      #     aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws_region: us-east-1
-      #     function_name: ${{ env.LAMBDA_FUNCTION }}
-      #     source: lambda-var.js
+      - name: Deploy lambda
+        uses: appleboy/lambda-action@master
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ env.AWS_REGION }}
+          function_name: ${{ env.LAMBDA_FUNCTION }}
+          source: lambda-var.js
