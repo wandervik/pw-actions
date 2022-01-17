@@ -72,7 +72,7 @@ jobs:
 
       - name: Check if remote repositiry is exist
         run: |
-          echo "::set-env name=DIRECTORY_EXIST::$(aws s3 ls s3://playwire-mobile-test/${{ env.prev_version }})
+          echo "DIRECTORY_EXIST=${{ aws s3 ls s3://playwire-mobile-test/${{ env.prev_version }} }}" >> $GITHUB_ENV
 
       - name: Proceed with build Check
         if: ${{ env.DIRECTORY_EXIST == ''}}
