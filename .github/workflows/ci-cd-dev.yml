@@ -74,9 +74,9 @@ jobs:
         run: |
           echo "::set-env name=DIRECTORY_EXIST::$(aws s3 ls s3://playwire-mobile-test/${{ env.prev_version }})
 
-      - name: Proceed with build Check
-        if: ${{ env.DIRECTORY_EXIST == ''}}
-        run: exit 1
+      # - name: Proceed with build Check
+      #   if: ${{ env.DIRECTORY_EXIST == ''}}
+      #   run: exit 1
 
       # - name: NPM build
       #   run: |
