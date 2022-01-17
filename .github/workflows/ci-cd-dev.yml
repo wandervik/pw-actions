@@ -70,32 +70,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
 
-      - name: Bash script
+      - name: Check old version repositiry existing
         run: |
-          if [[ $(aws s3 ls s3://playwire-mobile-test/${{ env.prev_version }}| head) ]]; then echo "do stuff"; else exit 1; fi
+          if [[ $(aws s3 ls s3://playwire-mobile-test/${{ env.prev_version }}| head) ]]; then echo "Old version exists"; else exit 1; fi
 
-      # - name: Check if remote repositiry is exist test
-      #   id: check
-      #   run: |
-      #     directory_exist=$(aws s3 ls s3://playwire-mobile-test/1.10.1)
-      #     echo "test: $directory_exist"
-      #     echo "::set-output name=directory::$directory_exist"
-      # - run: |
-      #     echo "testdir=$ {{ steps.check.outputs.directory }}" >> $GITHUB_ENV
-      #     echo "output: ${{ env.testdir }}"
-
-      # - name: Check use
-      #   run: echo "directory is ${{ steps.check.outputs.DIRECTORY }}"
-
-
-      #     echo "::set-output name=directory::$directory_exist"
-      # - run: |
-      #     echo "DIRECTORY_EXIST=${{ steps.check.outputs.directory }}" >> $GITHUB_ENV
-
-
-      # - name: Proceed with build Check
-      #   if: ${{ env.DIRECTORY_EXIST == ''}}
-      #   run: exit 1
+      - name: Prevent overriding old version
+        run: |
+          if [[ $(aws s3 ls s3://playwire-mobile-test/${{ env.new_version }}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
 
       # - name: NPM build
       #   run: |
@@ -112,9 +93,9 @@ jobs:
 
 
 
-      # - name: Push to bucket
-      #   run: |
-      #     aws s3 sync dist s3://playwire-mobile-test/${{ env.new_version }} --acl public-read
+      - name: Push to bucket
+        run: |
+          aws s3 sync dist s3://playwire-mobile-test/${{ env.new_version }} --acl public-read
 
       # - name: Invalidate CDN
       #   uses: chetan/invalidate-cloudfront-action@v2
