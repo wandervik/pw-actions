@@ -29,38 +29,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set version
-        id: set_var
-        run: |
-          content=`cat ./package.json`
-          content="${content//'%'/'%25'}"
-          content="${content//$'\n'/'%0A'}"
-          content="${content//$'\r'/'%0D'}"
-          echo "::set-output name=packageJson::$content"
-      - run: |
-          echo "prev_version=${{fromJson(steps.set_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+      # - name: Set version
+      #   id: set_var
+      #   run: |
+      #     content=`cat ./package.json`
+      #     content="${content//'%'/'%25'}"
+      #     content="${content//$'\n'/'%0A'}"
+      #     content="${content//$'\r'/'%0D'}"
+      #     echo "::set-output name=packageJson::$content"
+      # - run: |
+      #     echo "prev_version=${{fromJson(steps.set_var.outputs.packageJson).version}}" >> $GITHUB_ENV
 
-      - name:  'Automated Version Bump'
-        uses:  'phips28/gh-action-bump-version@master'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          minor-wording:  'add,Adds,new,feat,minor'
-          major-wording:  'MAJOR,cut-major'
-          patch-wording:  'patch,fixes'
-          rc-wording:     'RELEASE,alpha'
-          commit-message: 'Bumped version number. Current version: {{version}}'
+      # - name:  'Automated Version Bump'
+      #   uses:  'phips28/gh-action-bump-version@master'
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     minor-wording:  'add,Adds,new,feat,minor'
+      #     major-wording:  'MAJOR,cut-major'
+      #     patch-wording:  'patch,fixes'
+      #     rc-wording:     'RELEASE,alpha'
+      #     commit-message: 'Bumped version number. Current version: {{version}}'
 
-      - name: Set new version
-        id: set_new_var
-        run: |
-          content=`cat ./package.json`
-          content="${content//'%'/'%25'}"
-          content="${content//$'\n'/'%0A'}"
-          content="${content//$'\r'/'%0D'}"
-          echo "::set-output name=packageJson::$content"
-      - run: |
-          echo "new_version=${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+      # - name: Set new version
+      #   id: set_new_var
+      #   run: |
+      #     content=`cat ./package.json`
+      #     content="${content//'%'/'%25'}"
+      #     content="${content//$'\n'/'%0A'}"
+      #     content="${content//$'\r'/'%0D'}"
+      #     echo "::set-output name=packageJson::$content"
+      # - run: |
+      #     echo "new_version=${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $GITHUB_ENV
 
 
       - name: Configure AWS credentials
@@ -73,15 +73,18 @@ jobs:
       - name: Check if remote repositiry is exist
         id: check
         run: |
-          directory_exist=$(aws s3 ls s3://playwire-mobile-test/${{ env.prev_version }})
-          echo "::set-output name=directory::$directory_exist"
-      - run: |
-          echo "DIRECTORY_EXIST=${{ steps.check.outputs.directory }}" >> $GITHUB_ENV
+          directory_exist=$(aws s3 ls s3://playwire-mobile-test/1.10.1)
 
 
-      - name: Proceed with build Check
-        if: ${{ env.DIRECTORY_EXIST == ''}}
-        run: exit 1
+
+      #     echo "::set-output name=directory::$directory_exist"
+      # - run: |
+      #     echo "DIRECTORY_EXIST=${{ steps.check.outputs.directory }}" >> $GITHUB_ENV
+
+
+      # - name: Proceed with build Check
+      #   if: ${{ env.DIRECTORY_EXIST == ''}}
+      #   run: exit 1
 
       # - name: NPM build
       #   run: |
@@ -96,11 +99,11 @@ jobs:
 # >>>>>>>>>>>>>>>>>>>>>> DEPLOY <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-      # if [[ $(aws s3 ls s3://mybucket/myfolder | head) ]]; then echo "do stuff"; else echo "folder does not exist"; fi
 
-      - name: Push to bucket
-        run: |
-          aws s3 sync dist s3://playwire-mobile-test/${{ env.new_version }} --acl public-read
+
+      # - name: Push to bucket
+      #   run: |
+      #     aws s3 sync dist s3://playwire-mobile-test/${{ env.new_version }} --acl public-read
 
       # - name: Invalidate CDN
       #   uses: chetan/invalidate-cloudfront-action@v2
