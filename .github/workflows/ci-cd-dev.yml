@@ -29,38 +29,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      # - name: Set version
-      #   id: set_var
-      #   run: |
-      #     content=`cat ./package.json`
-      #     content="${content//'%'/'%25'}"
-      #     content="${content//$'\n'/'%0A'}"
-      #     content="${content//$'\r'/'%0D'}"
-      #     echo "::set-output name=packageJson::$content"
-      # - run: |
-      #     echo "prev_version=${{fromJson(steps.set_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+      - name: Set version
+        id: set_var
+        run: |
+          content=`cat ./package.json`
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          echo "::set-output name=packageJson::$content"
+      - run: |
+          echo "prev_version=${{fromJson(steps.set_var.outputs.packageJson).version}}" >> $GITHUB_ENV
 
-      # - name:  'Automated Version Bump'
-      #   uses:  'phips28/gh-action-bump-version@master'
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     minor-wording:  'add,Adds,new,feat,minor'
-      #     major-wording:  'MAJOR,cut-major'
-      #     patch-wording:  'patch,fixes'
-      #     rc-wording:     'RELEASE,alpha'
-      #     commit-message: 'Bumped version number. Current version: {{version}}'
+      - name:  'Automated Version Bump'
+        uses:  'phips28/gh-action-bump-version@master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          minor-wording:  'add,Adds,new,feat,minor'
+          major-wording:  'MAJOR,cut-major'
+          patch-wording:  'patch,fixes'
+          rc-wording:     'RELEASE,alpha'
+          commit-message: 'Bumped version number. Current version: {{version}}'
 
-      # - name: Set new version
-      #   id: set_new_var
-      #   run: |
-      #     content=`cat ./package.json`
-      #     content="${content//'%'/'%25'}"
-      #     content="${content//$'\n'/'%0A'}"
-      #     content="${content//$'\r'/'%0D'}"
-      #     echo "::set-output name=packageJson::$content"
-      # - run: |
-      #     echo "new_version=${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+      - name: Set new version
+        id: set_new_var
+        run: |
+          content=`cat ./package.json`
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          echo "::set-output name=packageJson::$content"
+      - run: |
+          echo "new_version=${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $GITHUB_ENV
 
 
       - name: Configure AWS credentials
@@ -72,7 +72,7 @@ jobs:
 
       - name: Bash script
         run: |
-          if [[ $(aws s3 ls s3://playwire-mobile-test/1.10.30 | head) ]]; then echo "do stuff"; else exit 1; fi
+          if [[ $(aws s3 ls s3://playwire-mobile-test/${{ env.prev_version }}| head) ]]; then echo "do stuff"; else exit 1; fi
 
       # - name: Check if remote repositiry is exist
       #   id: check
