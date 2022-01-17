@@ -70,15 +70,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
 
-      - name: Check if remote repositiry is exist
-        id: check
+      - name: Bash script
         run: |
-          directory_exist=$(aws s3 ls s3://playwire-mobile-test/1.10.1)
-          echo "test: $directory_exist"
-          echo "::set-output name=directory::$directory_exist"
-      - run: |
-          echo "testdir=$ {{ steps.check.outputs.directory }}" >> $GITHUB_ENV
-          echo "output: ${{ env.testdir }}"
+          if [[ $(aws s3 ls s3://playwire-mobile-test/1.10.1 | head) ]]; then echo "do stuff"; else echo "folder does not exist"; fi
+
+      # - name: Check if remote repositiry is exist
+      #   id: check
+      #   run: |
+      #     directory_exist=$(aws s3 ls s3://playwire-mobile-test/1.10.1)
+      #     echo "test: $directory_exist"
+      #     echo "::set-output name=directory::$directory_exist"
+      # - run: |
+      #     echo "testdir=$ {{ steps.check.outputs.directory }}" >> $GITHUB_ENV
+      #     echo "output: ${{ env.testdir }}"
 
       # - name: Check use
       #   run: echo "directory is ${{ steps.check.outputs.DIRECTORY }}"
