@@ -104,9 +104,9 @@ jobs:
 
       - name: Put current version
         run: |
-          version=${{ env.new_version }}
-          python3 insert-version.py $version
+          python3 insert-version.py ${{ env.prev_version }} ${{ env.new_version }}
 
+ # version=${{ env.new_version }}
 
       - name: Deploy lambda
         uses: appleboy/lambda-action@master
