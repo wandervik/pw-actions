@@ -75,10 +75,13 @@ jobs:
         run: |
           directory_exist=$(aws s3 ls s3://playwire-mobile-test/1.10.1)
           echo $directory_exist
-          echo '::set-output name=DIRECTORY::$directory_exist'
+          echo "::set-output name=directory::$directory_exist"
+      - run: |
+          echo "testdir=$ {{ steps.check.outputs.directory }}" >> $GITHUB_ENV
+          echo "output: ${{ env.testdir }}"
 
-      - name: Check use
-        run: echo "directory is ${{ steps.check.outputs.DIRECTORY }}"
+      # - name: Check use
+      #   run: echo "directory is ${{ steps.check.outputs.DIRECTORY }}"
 
 
       #     echo "::set-output name=directory::$directory_exist"
