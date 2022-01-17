@@ -75,7 +75,10 @@ jobs:
         run: |
           directory_exist=$(aws s3 ls s3://playwire-mobile-test/1.10.1)
           echo $directory_exist
+          echo '::set-output name=DIRECTORY::$directory_exist'
 
+      - name: Check use
+        run: echo "directory is ${{ steps.check.outputs.DIRECTORY }}"
 
 
       #     echo "::set-output name=directory::$directory_exist"
