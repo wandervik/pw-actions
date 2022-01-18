@@ -66,7 +66,7 @@ jobs:
         with:
             path: 'package.json'
             prop_path: 'version'
-      - run: echo "new_version=${{steps.version.outputs.prop}}" >> $GITHUB_ENV
+      - run: echo "new_version=${{steps.new_version.outputs.prop}}" >> $GITHUB_ENV
 
       - name: Debug
         run: echo "old version is - ${{ env.prev_version }} and new version is - ${{ env.new_version }}"
