@@ -29,12 +29,13 @@ jobs:
         uses: actions/checkout@v2
 
 
-      - name: Read package.json
-        uses: dutscher/read-package-json-endpoint-actions@v1.33.7
-        id: package-json-version
-
-      - name: Show version number
-        run: echo "${{ steps.package-json-version.outputs.version }}"
+      - name: get version
+        id: version
+        uses: notiz-dev/github-action-json-property@release
+        with:
+            path: 'package.json'
+            prop_path: 'version'
+      - run: echo ${{steps.version.outputs.prop}}
 
       # - name: Set version
       #   id: set_var
