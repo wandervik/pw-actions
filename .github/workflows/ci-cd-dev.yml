@@ -28,6 +28,122 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+
+      - name: Read package.json
+        uses: dutscher/read-package-json-endpoint-actions@v1.33.7
+        id: package-json-version
+
+      - name: Show version number
+        run: echo "${{ steps.package-json-version.outputs.version }}"
+
+      # - name: Set version
+      #   id: set_var
+      #   run: |
+      #     content=`cat ./package.json`
+      #     content="${content//'%'/'%25'}"
+      #     content="${content//$'\n'/'%0A'}"
+      #     content="${content//$'\r'/'%0D'}"
+      #     echo "::set-output name=packageJson::$content"
+      # - run: |
+      #     echo "prev_version=${{fromJson(steps.set_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+
+    #   - name:  'Automated Version Bump'
+    #     uses:  'phips28/gh-action-bump-version@master'
+    #     env:
+    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #     with:
+    #       minor-wording:  'add,Adds,new,feat,minor'
+    #       major-wording:  'MAJOR,cut-major'
+    #       patch-wording:  'patch,fixes'
+    #       rc-wording:     'RELEASE,alpha'
+    #       commit-message: 'Bumped version number. Current version: {{version}}'
+
+    #   - name: Set new version
+    #     id: set_new_var
+    #     run: |
+    #       content=`cat ./package.json`
+    #       content="${content//'%'/'%25'}"
+    #       content="${content//$'\n'/'%0A'}"
+    #       content="${content//$'\r'/'%0D'}"
+    #       echo "::set-output name=packageJson::$content"
+    #   - run: |
+    #       echo "new_version=${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+
+
+    #   - name: Configure AWS credentials
+    #     uses: aws-actions/configure-aws-credentials@v1
+    #     with:
+    #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #       aws-region: ${{ env.AWS_REGION }}
+
+    #   - name: Check old version repositiry existing
+    #     run: |
+    #       if [[ $(aws s3 ls ${{ env.AWS_S3_PATH }}/${{ env.prev_version }}| head) ]]; then echo "Old version exists"; else exit 1; fi
+
+    # # check if old version exists on dev then you may deploy on prod
+
+    #   - name: Prevent overriding old version
+    #     run: |
+    #       if [[ $(aws s3 ls ${{ env.AWS_S3_PATH }}/${{ env.new_version }}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
+
+      # - name: NPM build
+      #   run: |
+      #   uses: actions/setup-node@master
+      #   with:
+      #     node-version: 12
+      # - run: npm run buildCDN:dev
+
+# Debug msg versions:
+# echo "old version is - ${{ env.prev_version }} and new version is - ${{ env.new_version }}"
+
+# >>>>>>>>>>>>>>>>>>>>>> DEPLOY <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+      # - name: Push to bucket
+      #   run: |
+      #     aws s3 sync dist ${{ env.AWS_S3_PATH }}/${{ env.new_version }} --acl public-read
+
+      # - name: Invalidate CDN
+      #   uses: chetan/invalidate-cloudfront-action@v2
+      #   env:
+      #     DISTRIBUTION: ${{ env.AWS_CDN_DISTRIBUTION }}
+      #     PATHS: "/*"
+      #     AWS_REGION: ${{ env.AWS_REGION }}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # - name: Put current version
+      #   run: |
+      #     python3 insert-version.py new_version ${{ env.new_version }}
+
+      # - name: Deploy lambda
+      #   uses: appleboy/lambda-action@master
+      #   with:
+      #     aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws_region: ${{ env.AWS_REGION }}
+      #     function_name: ${{ env.LAMBDA_FUNCTION }}
+      #     source: lambda-var.js
+
+      # - name: Switch cloudfront trigger
+
+
+# >>>>>>>>>>>>>>>>>>>>>> PROD <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+  build-deploy-prod:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    env:
+      AWS_S3_PATH: s3://playwire-mobile-test
+      AWS_CDN_DISTRIBUTION: E3MY6RLJJ44XBK
+      LAMBDA_FUNCTION: version
+
+    environment: prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Set version
         id: set_var
         run: |
@@ -67,7 +183,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Check old version repositiry existing
         run: |
@@ -104,9 +220,7 @@ jobs:
 
       - name: Put current version
         run: |
-          python3 insert-version.py ${{ env.prev_version }} ${{ env.new_version }}
-
- # version=${{ env.new_version }}
+          python3 insert-version.py new_version ${{ env.new_version }}
 
       - name: Deploy lambda
         uses: appleboy/lambda-action@master
@@ -116,3 +230,6 @@ jobs:
           aws_region: ${{ env.AWS_REGION }}
           function_name: ${{ env.LAMBDA_FUNCTION }}
           source: lambda-var.js
+
+      # - name: Switch cloudfront trigger
+

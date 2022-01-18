@@ -1,5 +1,5 @@
 const http = require('http');
-const version_cloudfront='1.10.11';
+const version_cloudfront='new_version';
 
 let test4 = null;
 
