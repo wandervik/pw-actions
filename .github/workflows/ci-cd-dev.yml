@@ -59,9 +59,8 @@ jobs:
           major-wording:  'MAJOR,cut-major'
           patch-wording:  'patch,fixes'
           rc-wording:     'RELEASE,alpha'
-          commit-message: 'Bumped version number. Current version: {{version}}'
-
-
+          skip-commit:  'true'
+          skip-tag: 'true'
 
       - name: Get new version
         id: new_version
