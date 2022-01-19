@@ -37,6 +37,8 @@ jobs:
             prop_path: 'version'
       - run: echo "prev_version=${{steps.version.outputs.prop}}" >> $GITHUB_ENV
 
+      - run: mkdir temp
+
       - name: Create temporary version file
         id: create-json
         uses: jsdaniell/create-json@1.1.2
