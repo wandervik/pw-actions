@@ -46,28 +46,41 @@ jobs:
           name: "temp/package.json"
           json: '{"version":"${{ env.prev_version }}"}'
 
+      # - name: Debug
+      #   run: cat temp/package.json
+
+      - name:  'Automated Version Bump'
+        uses:  'phips28/gh-action-bump-version@master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PACKAGEJSON_DIR:  'temp'
+        with:
+          minor-wording:  'add,Adds,new,feat,minor'
+          major-wording:  'MAJOR,cut-major'
+          patch-wording:  'patch,fixes'
+          rc-wording:     'RELEASE,alpha'
+          commit-message: 'Bumped version number. Current version: {{version}}'
+
+
+
+      - name: Get new version
+        id: new_version
+        uses: notiz-dev/github-action-json-property@release
+        with:
+            path: 'temp/package.json'
+            prop_path: 'version'
+      - run: echo "new_version=${{steps.new_version.outputs.prop}}" >> $GITHUB_ENV
+
+      - name: Get prod version
+        id: prod_version
+        uses: notiz-dev/github-action-json-property@release
+        with:
+            path: 'package.json'
+            prop_path: 'version'
+      - run: echo "prod_version=${{steps.prod_version.outputs.prop}}" >> $GITHUB_ENV
+
       - name: Debug
-        run: cat temp/package.json
-
-#       - name:  'Automated Version Bump'
-#         uses:  'phips28/gh-action-bump-version@master'
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         with:
-#           minor-wording:  'add,Adds,new,feat,minor'
-#           major-wording:  'MAJOR,cut-major'
-#           patch-wording:  'patch,fixes'
-#           rc-wording:     'RELEASE,alpha'
-#           commit-message: 'Bumped version number. Current version: {{version}}'
-
-#       - name: Get new version
-#         id: new_version
-#         uses: notiz-dev/github-action-json-property@release
-#         with:
-#             path: 'package.json'
-#             prop_path: 'version'
-#       - run: echo "new_version=${{steps.new_version.outputs.prop}}" >> $GITHUB_ENV
-
+        run: echo "old version is - ${{ env.prev_version }} and new version for dev is - ${{ env.new_version }} and version for dev is ${{ env.prod_version }}"
 
 #       - name: Configure AWS credentials
 #         uses: aws-actions/configure-aws-credentials@v1
