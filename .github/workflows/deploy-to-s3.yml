@@ -54,4 +54,4 @@ jobs:
         - name: Test Variables
           env:
             APP_NAME: "app-name"
-          run: echo "aws s3 --region some-region cp "s3://some/path/to/config/${{ env.APP_NAME }}_values.yaml"
+          run: echo "aws s3 --region some-region cp "s3://some/path/to/config/${{ env.APP_NAME }}_values.yaml""
