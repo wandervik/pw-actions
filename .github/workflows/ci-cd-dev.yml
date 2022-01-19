@@ -41,14 +41,11 @@ jobs:
         id: create-json
         uses: jsdaniell/create-json@1.1.2
         with:
-          name: "temp-version.json"
+          name: "temp/package.json"
           json: '{"version":"${{ env.prev_version }}"}'
 
       - name: Debug
-        run: cat temp-version.json
-
-
-
+        run: cat temp/package.json
 
 #       - name:  'Automated Version Bump'
 #         uses:  'phips28/gh-action-bump-version@master'
