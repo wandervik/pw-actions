@@ -11,6 +11,8 @@ env:
   AWS_REGION: "eu-central-1"
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_S3_PATH_DEV: s3://playwire-mobile-test
+  AWS_S3_PATH_PROD: test
 
 
 jobs:
@@ -18,7 +20,6 @@ jobs:
     # if: ${{ github.ref == 'refs/heads/release' }}
     runs-on: ubuntu-latest
     env:
-     AWS_S3_PATH: s3://playwire-mobile-test
      AWS_CDN_DISTRIBUTION: E3MY6RLJJ44XBK
      LAMBDA_FUNCTION: version
 
@@ -38,16 +39,12 @@ jobs:
       - run: echo "prev_version=${{steps.version.outputs.prop}}" >> $GITHUB_ENV
 
       - run: mkdir temp
-
       - name: Create temporary version file
         id: create-json
         uses: jsdaniell/create-json@1.1.2
         with:
           name: "temp/package.json"
           json: '{"version":"${{ env.prev_version }}"}'
-
-      # - name: Debug
-      #   run: cat temp/package.json
 
       - name:  'Automated Version Bump'
         uses:  'phips28/gh-action-bump-version@master'
@@ -70,76 +67,53 @@ jobs:
             prop_path: 'version'
       - run: echo "new_version=${{steps.new_version.outputs.prop}}" >> $GITHUB_ENV
 
-      - name: Get prod version
-        id: prod_version
-        uses: notiz-dev/github-action-json-property@release
+      # - name: Debug
+      #   run: echo "old version is - ${{ env.prev_version }} and new version for dev is - ${{ env.new_version }} and version for prod is ${{ env.prod_version }}"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-            path: 'package.json'
-            prop_path: 'version'
-      - run: echo "prod_version=${{steps.prod_version.outputs.prop}}" >> $GITHUB_ENV
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Debug
-        run: echo "old version is - ${{ env.prev_version }} and new version for dev is - ${{ env.new_version }} and version for dev is ${{ env.prod_version }}"
+      - name: Check old version repositiry existing
+        run: |
+          if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ env.prev_version }}| head) ]]; then echo "Old version exists"; else exit 1; fi
 
-#       - name: Configure AWS credentials
-#         uses: aws-actions/configure-aws-credentials@v1
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: ${{ env.AWS_REGION }}
+    # # check if old version exists on dev then you may deploy on prod
 
-#       - name: Check old version repositiry existing
-#         run: |
-#           if [[ $(aws s3 ls ${{ env.AWS_S3_PATH }}/${{ env.prev_version }}| head) ]]; then echo "Old version exists"; else exit 1; fi
+      - name: Prevent overriding old version
+        run: |
+          if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ env.new_version }}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
 
-#     # # check if old version exists on dev then you may deploy on prod
+      # - name: NPM build
+      #   run: |
+      #   uses: actions/setup-node@master
+      #   with:
+      #     node-version: 12
+      # - run: npm run buildCDN:dev
 
-#       - name: Prevent overriding old version
-#         run: |
-#           if [[ $(aws s3 ls ${{ env.AWS_S3_PATH }}/${{ env.new_version }}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
+# Debug msg versions:
+# echo "old version is - ${{ env.prev_version }} and new version is - ${{ env.new_version }}"
 
-#       - name: NPM build
-#         run: |
-#         uses: actions/setup-node@master
-#         with:
-#           node-version: 12
-#       - run: npm run buildCDN:dev
+# >>>>>>>>>>>>>>>>>>>>>> DEPLOY <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-# # Debug msg versions:
-# # echo "old version is - ${{ env.prev_version }} and new version is - ${{ env.new_version }}"
+      - name: Push to bucket
+        run: |
+          aws s3 sync dist ${{ env.AWS_S3_PATH_DEV }}/${{ env.new_version }} --acl public-read
 
-# # >>>>>>>>>>>>>>>>>>>>>> DEPLOY <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-#       - name: Push to bucket
-#         run: |
-#           aws s3 sync dist ${{ env.AWS_S3_PATH }}/${{ env.new_version }} --acl public-read
-
-#       - name: Invalidate CDN
-#         uses: chetan/invalidate-cloudfront-action@v2
-#         env:
-#           DISTRIBUTION: ${{ env.AWS_CDN_DISTRIBUTION }}
-#           PATHS: "/*"
-#           AWS_REGION: ${{ env.AWS_REGION }}
-#           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-#       - name: Put current version
-#         run: |
-#           python3 insert-version.py new_version ${{ env.new_version }}
-
-#       - name: Deploy lambda
-#         uses: appleboy/lambda-action@master
-#         with:
-#           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws_region: ${{ env.AWS_REGION }}
-#           function_name: ${{ env.LAMBDA_FUNCTION }}
-#           source: lambda-var.js
-
-#       # - name: Switch cloudfront trigger
+      - name: Invalidate CDN
+        uses: chetan/invalidate-cloudfront-action@v2
+        env:
+          DISTRIBUTION: ${{ env.AWS_CDN_DISTRIBUTION }}
+          PATHS: "/*"
+          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 
-# # >>>>>>>>>>>>>>>>>>>>>> PROD <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+# >>>>>>>>>>>>>>>>>>>>>> PROD <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #   build-deploy-prod:
 #     if: ${{ github.ref == 'refs/heads/master' }}
@@ -155,16 +129,14 @@ jobs:
 #       - name: Checkout
 #         uses: actions/checkout@v2
 
-#       - name: Set version
-#         id: set_var
-#         run: |
-#           content=`cat ./package.json`
-#           content="${content//'%'/'%25'}"
-#           content="${content//$'\n'/'%0A'}"
-#           content="${content//$'\r'/'%0D'}"
-#           echo "::set-output name=packageJson::$content"
-#       - run: |
-#           echo "prev_version=${{fromJson(steps.set_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+
+#       - name: Get version
+#         id: prev_version
+#         uses: notiz-dev/github-action-json-property@release
+#         with:
+#             path: 'package.json'
+#             prop_path: 'version'
+#       - run: echo "prev_version=${{steps.prev_version.outputs.prop}}" >> $GITHUB_ENV
 
 #       - name:  'Automated Version Bump'
 #         uses:  'phips28/gh-action-bump-version@master'
@@ -177,16 +149,13 @@ jobs:
 #           rc-wording:     'RELEASE,alpha'
 #           commit-message: 'Bumped version number. Current version: {{version}}'
 
-#       - name: Set new version
-#         id: set_new_var
-#         run: |
-#           content=`cat ./package.json`
-#           content="${content//'%'/'%25'}"
-#           content="${content//$'\n'/'%0A'}"
-#           content="${content//$'\r'/'%0D'}"
-#           echo "::set-output name=packageJson::$content"
-#       - run: |
-#           echo "new_version=${{fromJson(steps.set_new_var.outputs.packageJson).version}}" >> $GITHUB_ENV
+#       - name: Get new version
+#         id: new_version
+#         uses: notiz-dev/github-action-json-property@release
+#         with:
+#             path: 'package.json'
+#             prop_path: 'version'
+#       - run: echo "new_version=${{steps.new_version.outputs.prop}}" >> $GITHUB_ENV
 
 
 #       - name: Configure AWS credentials
@@ -198,11 +167,15 @@ jobs:
 
 #       - name: Check old version repositiry existing
 #         run: |
-#           if [[ $(aws s3 ls ${{ env.AWS_S3_PATH }}/${{ env.prev_version }}| head) ]]; then echo "Old version exists"; else exit 1; fi
+#           if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_PROD }}/${{ env.prev_version }}| head) ]]; then echo "Old version exists"; else exit 1; fi
 
 #       - name: Prevent overriding old version
 #         run: |
-#           if [[ $(aws s3 ls ${{ env.AWS_S3_PATH }}/${{ env.new_version }}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
+#           if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_PROD }}/${{ env.new_version }}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
+
+#       - name: Check if prod version was tested on dev
+#         run: |
+#           if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ env.new_version }}| head) ]]; then echo "The version was tested on dev"; else exit 1; fi
 
 #       # - name: NPM build
 #       #   run: |
@@ -218,7 +191,7 @@ jobs:
 
 #       - name: Push to bucket
 #         run: |
-#           aws s3 sync dist ${{ env.AWS_S3_PATH }}/${{ env.new_version }} --acl public-read
+#           aws s3 sync dist ${{ env.AWS_S3_PATH_PROD }}/${{ env.new_version }} --acl public-read
 
 #       # - name: Invalidate CDN
 #       #   uses: chetan/invalidate-cloudfront-action@v2
