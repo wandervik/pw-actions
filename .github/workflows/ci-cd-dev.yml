@@ -81,8 +81,6 @@ jobs:
         run: |
           if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ env.prev_version }}| head) ]]; then echo "Old version exists"; else exit 1; fi
 
-    # # check if old version exists on dev then you may deploy on prod
-
       - name: Prevent overriding old version
         run: |
           if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ env.new_version }}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
@@ -92,7 +90,7 @@ jobs:
       #   uses: actions/setup-node@master
       #   with:
       #     node-version: 12
-      # - run: npm run buildCDN:dev
+      # - run: npm run buildCDN:dev #require version specifying
 
 # Debug msg versions:
 # echo "old version is - ${{ env.prev_version }} and new version is - ${{ env.new_version }}"
@@ -103,14 +101,14 @@ jobs:
         run: |
           aws s3 sync dist ${{ env.AWS_S3_PATH_DEV }}/${{ env.new_version }} --acl public-read
 
-      - name: Invalidate CDN
-        uses: chetan/invalidate-cloudfront-action@v2
-        env:
-          DISTRIBUTION: ${{ env.AWS_CDN_DISTRIBUTION }}
-          PATHS: "/*"
-          AWS_REGION: ${{ env.AWS_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # - name: Invalidate CDN
+      #   uses: chetan/invalidate-cloudfront-action@v2
+      #   env:
+      #     DISTRIBUTION: ${{ env.AWS_CDN_DISTRIBUTION }}
+      #     PATHS: "/*"
+      #     AWS_REGION: ${{ env.AWS_REGION }}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 
 # >>>>>>>>>>>>>>>>>>>>>> PROD <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
