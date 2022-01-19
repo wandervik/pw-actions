@@ -4,7 +4,7 @@ name: S3 Continuous Deployment to dev
 #   pull_request:
 #     branches: [ 'release', 'master' ]
 on:
-  push:
+  pull_request:
     branches: [ main ]
 
 env:
@@ -109,6 +109,8 @@ jobs:
       #     AWS_REGION: ${{ env.AWS_REGION }}
       #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Write logs
 
 
 # >>>>>>>>>>>>>>>>>>>>>> PROD <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

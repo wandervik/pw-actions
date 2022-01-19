@@ -1,6 +1,6 @@
-name: Deploy to S3 with envs
+name: Test
 on:
-  pull_request:
+  push:
     branches: [ main ]
 
  # workflow_dispatch:
@@ -51,15 +51,7 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v2
 
-        - name: Set version
-          id: set_var
-          run: |
-            content=`cat ./package.json`
-            content="${content//'%'/'%25'}"
-            content="${content//$'\n'/'%0A'}"
-            content="${content//$'\r'/'%0D'}"
-            echo "::set-output name=packageJson::$content"
-        - run: |
-            VERSION="${{fromJson(steps.set_var.outputs.packageJson).version}}"
-        - name: Test
-          run: echo "$VERSION"
+        - name: Test Variables
+          env:
+            TEST: "app-name"
+          run: echo "test values is &{{ TEST }}"
