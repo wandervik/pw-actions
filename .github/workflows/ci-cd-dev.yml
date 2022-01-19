@@ -81,9 +81,9 @@ jobs:
         run: |
           if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ env.prev_version }}| head) ]]; then echo "Old version exists"; else exit 1; fi
 
-      - name: Prevent overriding old version
-        run: |
-          if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ env.new_version }}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
+      # - name: Prevent overriding old version
+      #   run: |
+      #     if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ env.new_version }}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
 
       # - name: NPM build
       #   run: |
