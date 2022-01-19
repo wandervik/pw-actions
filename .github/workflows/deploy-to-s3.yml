@@ -54,4 +54,4 @@ jobs:
         - name: Test Variables
           env:
             TEST: "app-name"
-          run: echo "test values is &{{ TEST }}"
+          run: echo "test values is &{{ env.TEST }}"
